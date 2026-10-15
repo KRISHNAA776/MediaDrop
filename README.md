@@ -1,6 +1,6 @@
 # MediaDrop
 
-Zero-dependency Node 18+ app. Run: `node server.mjs` → http://localhost:3000. Change the name in `public/app.js` (`BRAND`) and `<title>`.
+Zero-dependency Node 18+ app. Run: `node lib/mediadrop.mjs` → http://localhost:3000. Change the name in `public/app.js` (`BRAND`) and `<title>`.
 
 ## Config (env vars)
 
