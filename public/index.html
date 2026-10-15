@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MediaDrop</title>
+    <meta
+      name="description"
+      content="Paste a supported media link, discover available formats, and access authorized downloads."
+    />
+    <style>
+      :root {
+        --bg: #0b1226;
+        --card: #131c38;
+        --line: #26325a;
+        --tx: #eef1ff;
+        --mu: #a5afd6;
+        --ac: #7c6cff;
+        --ac2: #3b82f6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font:
+          16px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background:
+          radial-gradient(900px 500px at 50% -10%, #24306a55, transparent),
+          var(--bg);
+        color: var(--tx);
+      }
+      a {
+        color: #a9b6ff;
+      }
+      :focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 2px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 24px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 5vw;
+        border-bottom: 1px solid var(--line);
+      }
+      .logo {
+        font-weight: 800;
+        font-size: 1.3rem;
+        text-decoration: none;
+        color: var(--tx);
+      }
+      .logo b {
+        background: linear-gradient(90deg, var(--ac), var(--ac2));
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 18px;
+      }
+      nav a {
+        color: var(--mu);
+        text-decoration: none;
+        padding: 4px 0;
+      }
+      nav a[aria-current="page"] {
+        color: var(--tx);
+        border-bottom: 2px solid var(--ac);
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 48px 5vw 80px;
+      }
+      h1 {
+        font-size: clamp(2rem, 6vw, 3.2rem);
+        line-height: 1.15;
+        margin: 0 0 12px;
+        text-align: center;
+      }
+      h2 {
+        margin-top: 0;
+      }
+      .sub {
+        color: var(--mu);
+        text-align: center;
+        max-width: 620px;
+        margin: 0 auto 32px;
+      }
+      .box {
+        display: flex;
+        gap: 8px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 8px;
+        box-shadow: 0 12px 40px #0006;
+      }
+      .box input {
+        flex: 1;
+        min-width: 0;
+        background: none;
+        border: 0;
+        color: var(--tx);
+        font: inherit;
+        padding: 12px 14px;
+      }
+      .box input:focus {
+        outline: 0;
+      }
+      .box:focus-within {
+        border-color: var(--ac);
+      }
+      button,
+      .btn {
+        font: inherit;
+        cursor: pointer;
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(90deg, var(--ac), var(--ac2));
+        text-decoration: none;
+        display: inline-block;
+      }
+      button.ghost {
+        background: none;
+        border: 1px solid var(--line);
+        color: var(--tx);
+      }
+      button:hover,
+      .btn:hover {
+        filter: brightness(1.1);
+      }
+      .box button.ghost {
+        padding: 12px 14px;
+      }
+      @media (max-width: 560px) {
+        .box {
+          flex-wrap: wrap;
+        }
+        .box input {
+          flex-basis: 100%;
+        }
+        .box .go {
+          flex: 1;
+        }
+      }
+      .plats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin: 28px 0 8px;
+      }
+      .plats span {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 16px;
+        color: var(--mu);
+        background: #ffffff08;
+      }
+      .fine {
+        color: var(--mu);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 20px;
+        margin-top: 28px;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .row img {
+        width: 200px;
+        max-width: 100%;
+        border-radius: 12px;
+        object-fit: cover;
+        align-self: flex-start;
+      }
+      .grow {
+        flex: 1;
+        min-width: 220px;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.8rem;
+        border-radius: 999px;
+        padding: 2px 12px;
+        background: #7c6cff33;
+        color: #c9c2ff;
+      }
+      .fmt {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .err {
+        border-color: #ff6b81;
+        background: #3a1626;
+      }
+      .note {
+        background: #ffffff0a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 14px 0;
+        color: var(--mu);
+      }
+      .spin {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--mu);
+        border-top-color: var(--ac);
+        border-radius: 50%;
+        animation: s 1s linear infinite;
+        vertical-align: -2px;
+        margin-right: 8px;
+      }
+      @keyframes s {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+      }
+      ol li,
+      ul li {
+        margin: 6px 0;
+      }
+      footer {
+        text-align: center;
+        color: var(--mu);
+        padding: 24px;
+        border-top: 1px solid var(--line);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="logo" href="#home"><b data-brand>MediaDrop</b></a>
+      <nav aria-label="Main">
+        <a href="#home">Home</a><a href="#platforms">Supported Platforms</a
+        ><a href="#how">How It Works</a><a href="#faq">FAQ</a
+        ><a href="#privacy">Privacy Policy</a>
+      </nav>
+    </header>
+    <main>
+      <section data-page="home">
+        <h1>Download Media, the Easy Way</h1>
+        <p class="sub">
+          Paste a supported media link, discover available formats, and access
+          authorized downloads in a few simple steps.
+        </p>
+        <div class="box">
+          <input
+            id="url"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            placeholder="Paste your video or media link here…"
+            aria-label="Media link"
+          />
+          <button
+            class="ghost"
+            id="paste"
+            title="Paste from clipboard"
+            aria-label="Paste from clipboard"
+          >
+            📋</button
+          ><button class="go" id="go">Analyze Link</button>
+        </div>
+        <div class="plats" aria-label="Recognized platforms">
+          <span>YouTube</span><span>Instagram</span><span>Facebook</span
+          ><span>X</span><span>TikTok</span><span>Reddit</span
+          ><span>Vimeo</span>
+        </div>
+        <p class="fine">
+          Recognizing a platform does not mean its content can be downloaded.
+          Actual capabilities depend on each platform's rules and the
+          integrations configured on this server.
+        </p>
+        <div id="status" role="status" aria-live="polite" class="fine"></div>
+        <div id="result"></div>
+      </section>
+
+      <section data-page="platforms" hidden>
+        <h2>Supported Platforms</h2>
+        <p>
+          Each platform is handled by its own adapter that declares what is
+          permitted. Metadata uses the platform's official oEmbed endpoint.
+        </p>
+        <ul>
+          <li>
+            <b>YouTube, Vimeo, X, TikTok, Reddit</b>: link analysis (title,
+            creator, thumbnail) and a link to the original. No direct download.
+          </li>
+          <li>
+            <b>Facebook, Instagram</b>: same, but Meta requires an approved app
+            token (<code>META_OEMBED_TOKEN</code>). Without it, analysis is
+            unavailable.
+          </li>
+          <li>
+            <b>Direct media files</b> (.mp4, .webm, .mp3, .m4a …): files you own
+            or are authorized to use can be downloaded as the original,
+            unmodified file.
+          </li>
+        </ul>
+      </section>
+
+      <section data-page="how" hidden>
+        <h2>How It Works</h2>
+        <ol>
+          <li>Paste a link and press <b>Analyze Link</b>.</li>
+          <li>
+            The server validates the URL, identifies the platform and checks
+            what that platform's adapter permits.
+          </li>
+          <li>
+            You see only verified information. Formats are never invented or
+            upscaled.
+          </li>
+          <li>
+            If a download is permitted, the button starts a real download of the
+            original file. Otherwise you get the official link.
+          </li>
+        </ol>
+      </section>
+
+      <section data-page="faq" hidden>
+        <h2>FAQ</h2>
+        <h3>Why can't I download from YouTube or Instagram?</h3>
+        <p>
+          Those platforms do not permit downloads through unofficial tools.
+          MediaDrop does not bypass logins, DRM, private accounts or rate
+          limits.
+        </p>
+        <h3>Do you convert audio?</h3>
+        <p>
+          Not in this version. Only original files are offered, and we never
+          label a file with a higher quality than the source.
+        </p>
+        <h3>How long are download links valid?</h3>
+        <p>
+          10 minutes. Nothing is stored on the server; files stream straight
+          from the source.
+        </p>
+        <h3>Do you need my social media login?</h3>
+        <p>Never. Do not share passwords, cookies or tokens with anyone.</p>
+      </section>
+
+      <section data-page="contact" hidden>
+        <h2>Contact Us</h2>
+        <p>
+          Questions or rights-related complaints:
+          <a href="mailto:contact@example.com">contact@example.com</a> (replace
+          with your real address before launch).
+        </p>
+      </section>
+
+      <section data-page="privacy" hidden>
+        <h2>Privacy Policy</h2>
+        <p>
+          <i
+            >Template: have it reviewed by a qualified lawyer and adapt it to
+            your hosting and jurisdiction.</i
+          >
+        </p>
+        <ul>
+          <li>
+            Submitted links are processed to fetch public metadata and are not
+            stored.
+          </li>
+          <li>
+            No files are stored; downloads stream from the source and download
+            links expire after 10 minutes.
+          </li>
+          <li>
+            We never ask for or store social media passwords, cookies or tokens.
+          </li>
+          <li>
+            Your IP address is used in memory only for rate limiting (cleared
+            every 10 minutes). Your host may keep standard access logs.
+          </li>
+        </ul>
+      </section>
+
+      <section data-page="terms" hidden>
+        <h2>Terms of Use</h2>
+        <p><i>Template: have it reviewed by a qualified lawyer.</i></p>
+        <ul>
+          <li>
+            You are responsible for having the rights and permissions needed to
+            download or convert any content.
+          </li>
+          <li>
+            Do not use the service to infringe copyright, bypass access
+            controls, or abuse it (automated bulk requests).
+          </li>
+          <li>
+            The service is provided "as is" without warranty; availability of
+            any platform feature may change.
+          </li>
+        </ul>
+      </section>
+
+      <section data-page="copyright" hidden>
+        <h2>Copyright and Content Removal Policy</h2>
+        <p><i>Template: have it reviewed by a qualified lawyer.</i></p>
+        <p>
+          We respect intellectual property. To report content, email
+          <a href="mailto:contact@example.com">contact@example.com</a> with: the
+          link concerned, your contact details, a description of the work and
+          your rights in it, and a statement that the complaint is accurate. We
+          review complaints promptly and may block the link and repeat
+          infringers.
+        </p>
+      </section>
+    </main>
+    <footer>
+      <nav aria-label="Legal">
+        <a href="#contact">Contact</a> · <a href="#privacy">Privacy</a> ·
+        <a href="#terms">Terms of Use</a> ·
+        <a href="#copyright">Copyright &amp; Removal</a>
+      </nav>
+      <p>
+        You are responsible for ensuring you have the rights to download or
+        convert content.
+      </p>
+    </footer>
+    <script src="/app.js"></script>
+  </body>
+</html>
